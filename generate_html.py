@@ -322,24 +322,16 @@ HTML_TEMPLATE = """\
     margin        : { t: 0, r: 0, l: 0, b: 0 },
     paper_bgcolor : '#ffffff',
     font          : { family: 'system-ui, sans-serif', size: 11 },
-    geo: {
-      scope         : 'europe',
-      center        : { lat: 40.0, lon: -5.0 },
-      lataxis       : { range: [26.5, 44.5] },
-      lonaxis       : { range: [-19.0, 5.0] },
-      showland      : true,  landcolor      : '#e8ecef',
-      showocean     : true,  oceancolor     : '#cce3f0',
-      showcoastlines: true,  coastlinecolor : '#8aa',
-      showsubunits  : true,  subunitcolor   : '#aab',
-      showframe     : false,
-      bgcolor       : '#ffffff',
-      projection    : { type: 'mercator' },
+    mapbox: {
+      style  : 'open-street-map',
+      center : { lat: 36.5, lon: -8.0 },
+      zoom   : 4,
     },
   };
 
   function updateMap(data) {
     Plotly.react('chart-map', [{
-      type      : 'scattergeo',
+      type      : 'scattermapbox',
       lat       : data.map(d => d.latitud),
       lon       : data.map(d => d.longitud),
       mode      : 'markers',
@@ -351,13 +343,12 @@ HTML_TEMPLATE = """\
         `${d.fecha}  ${d.hora_local || ''}`
       ),
       marker: {
-        size       : data.map(d => Math.max(4, (d.magnitud || 0) * 3.5)),
+        size       : data.map(d => Math.max(6, (d.magnitud || 0) * 5)),
         color      : data.map(d => d.magnitud),
         colorscale : 'Reds',
         cmin       : MAG_GLOBAL_MIN,
         cmax       : MAG_GLOBAL_MAX,
         opacity    : 0.80,
-        line       : { width: 0.5, color: '#555' },
         colorbar   : { title: { text: 'Mag', side: 'right' }, thickness: 12, len: 0.65 },
       },
     }], MAP_LAYOUT, MAP_CFG);
