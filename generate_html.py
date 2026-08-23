@@ -317,7 +317,7 @@ HTML_TEMPLATE = """\
   }
 
   // ── Mapa ─────────────────────────────────────────────────────────────────────
-  const MAP_CFG    = { responsive: true, displayModeBar: false };
+  const MAP_CFG    = { responsive: true, displayModeBar: false, scrollZoom: true };
   const MAP_LAYOUT = {
     margin        : { t: 0, r: 0, l: 0, b: 0 },
     paper_bgcolor : '#ffffff',
