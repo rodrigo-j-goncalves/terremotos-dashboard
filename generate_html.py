@@ -487,7 +487,7 @@ HTML_TEMPLATE = """\
     const esc = v => {
       if (v === null || v === undefined) return '';
       const s = String(v);
-      return (s.includes(',') || s.includes('"') || /\n/.test(s))
+      return (s.includes(',') || s.includes('"') || /\\n/.test(s))
         ? '"' + s.replace(/"/g, '""') + '"' : s;
     };
     const lines = [cols.join(','), ...DATA.map(d => cols.map(c => esc(d[c])).join(','))];
