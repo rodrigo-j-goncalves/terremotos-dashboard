@@ -13,7 +13,7 @@ from pathlib import Path
 import pandas as pd
 
 DB_PATH = Path(__file__).resolve().parent / "terremotos_db.csv"
-HTML_PATH = Path(__file__).resolve().parent / "terremotos.html"
+HTML_PATH = Path(__file__).resolve().parent / "index.html"
 
 # Columnas que se incluyen en el JSON embebido (orden = orden de la tabla)
 COLS = [
