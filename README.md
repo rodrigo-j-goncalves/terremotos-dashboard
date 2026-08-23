@@ -3,8 +3,7 @@
 Dashboard estático de sismicidad en España, generado a partir de las tablas publicadas por el
 [Instituto Geográfico Nacional (IGN)](https://www.ign.es/web/ultimos-terremotos).
 
-**Demo:** [GitHub Pages](https://TU_USUARIO.github.io/terremotos-dashboard/)
-*(reemplazar con la URL real al publicar)*
+**Demo:** https://rodrigo-j-goncalves.github.io/terremotos-dashboard/
 
 ---
 
@@ -14,7 +13,7 @@ Dashboard estático de sismicidad en España, generado a partir de las tablas pu
    año significativos), las fusiona en `terremotos_db.csv` sin duplicar eventos.
    Si el IGN revisa una magnitud o localización, la versión más reciente prevalece (`keep=last`).
 
-2. **`generate_html.py`** — Lee `terremotos_db.csv` y genera `terremotos.html`:
+2. **`generate_html.py`** — Lee `terremotos_db.csv` y genera `index.html`:
    página 100 % estática con Plotly.js (CDN) y JS vanilla.
    - Scatter magnitud vs. tiempo (hora local España)
    - Mapa de epicentros (scattergeo, cubre Península + Canarias)
@@ -31,10 +30,12 @@ No hay backend ni servidor: el HTML resultante puede servirse directamente desde
 python >= 3.10
 pandas
 requests
+html5lib
+beautifulsoup4
 ```
 
 ```bash
-pip install pandas requests
+pip install pandas requests html5lib beautifulsoup4
 ```
 
 ---
@@ -49,8 +50,8 @@ python terremotos.py
 python generate_html.py
 
 # 3. Abrir en el navegador
-xdg-open terremotos.html   # Linux
-open terremotos.html        # macOS
+xdg-open index.html   # Linux
+open index.html        # macOS
 ```
 
 ---
@@ -59,7 +60,7 @@ open terremotos.html        # macOS
 
 El workflow `.github/workflows/update.yml` ejecuta los dos scripts a diario,
 **commitea `terremotos_db.csv` de vuelta al repo** (para acumular historia),
-y despliega `terremotos.html` en GitHub Pages.
+y despliega `index.html` en GitHub Pages.
 
 > **Por qué commitear el CSV:** GitHub Actions hace checkout limpio en cada
 > ejecución. Sin el commit, el CSV solo contendría los eventos del día actual;
@@ -90,7 +91,7 @@ jobs:
           python-version: "3.12"
 
       - name: Instalar dependencias
-        run: pip install pandas requests
+        run: pip install pandas requests html5lib beautifulsoup4
 
       - name: Scrapear IGN y actualizar CSV
         run: python terremotos.py
@@ -115,10 +116,12 @@ jobs:
         uses: actions/deploy-pages@v4
 ```
 
-Para activarlo:
+El workflow corre automáticamente todos los días a las 06:00 UTC. Para ejecución manual
+(ej. durante un enjambre sísmico): **Actions → Actualizar dashboard → Run workflow**.
+
+Para activarlo por primera vez:
 1. En el repo → **Settings → Pages → Source**: seleccionar *GitHub Actions*.
-2. Hacer push del workflow. La primera ejecución puede lanzarse manualmente
-   desde **Actions → Actualizar dashboard → Run workflow**.
+2. Lanzar manualmente desde **Actions → Actualizar dashboard → Run workflow**.
 
 ---
 
@@ -128,8 +131,8 @@ Para activarlo:
 terremotos-dashboard/
 ├── terremotos.py          # scraper + actualización de DB
 ├── generate_html.py       # generador de dashboard estático
-├── terremotos_db.csv      # base de datos acumulada (generada, no editar)
-├── terremotos.html        # dashboard (generado, no editar)
+├── terremotos_db.csv      # base de datos acumulada (commitear; crece con el tiempo)
+├── index.html             # dashboard (generado por Actions; en .gitignore)
 ├── .github/
 │   └── workflows/
 │       └── update.yml     # automatización diaria
