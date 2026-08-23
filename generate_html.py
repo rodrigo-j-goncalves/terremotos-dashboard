@@ -106,13 +106,15 @@ HTML_TEMPLATE = """\
     .mag-row input[type=range] { width: 120px; cursor: pointer; accent-color: #3b82f6; }
     .mag-val { min-width: 2.2rem; text-align: right; font-variant-numeric: tabular-nums; }
 
-    /* Badge y reset */
-    .count-badge { font-size: 0.82rem; color: #475569; align-self: center; margin-left: auto; }
-    .btn-reset {
+    /* Badge y botones */
+    .count-badge { font-size: 0.82rem; color: #475569; margin-left: auto; }
+    .btn-reset,
+    .btn-csv {
       padding: 0.3rem 0.7rem; border: 1px solid #cbd5e1; border-radius: 5px;
       background: #fff; cursor: pointer; font-size: 0.8rem; color: #475569;
     }
-    .btn-reset:hover { background: #f1f5f9; }
+    .btn-reset:hover,
+    .btn-csv:hover { background: #f1f5f9; }
 
     /* Grid de gráficos */
     .plots {
@@ -201,6 +203,7 @@ HTML_TEMPLATE = """\
     <input type="date" id="date-to">
   </div>
   <span class="count-badge" id="count"></span>
+  <button class="btn-csv"   onclick="downloadCSV()" title="Descargar todos los eventos como CSV">&#8659; CSV</button>
   <button class="btn-reset" onclick="resetFilters()">&#8635; Reset</button>
 </div>
 
@@ -476,6 +479,24 @@ HTML_TEMPLATE = """\
       state.dateTo = e.target.value;
       applyFilters();
     });
+  }
+
+  // ── Descarga CSV ──────────────────────────────────────────────────────────────
+  function downloadCSV() {
+    const cols = Object.keys(DATA[0] || {});
+    const esc = v => {
+      if (v === null || v === undefined) return '';
+      const s = String(v);
+      return (s.includes(',') || s.includes('"') || s.includes('\n'))
+        ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    const lines = [cols.join(','), ...DATA.map(d => cols.map(c => esc(d[c])).join(','))];
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'terremotos_ign.csv';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
   }
 
   function resetFilters() {
