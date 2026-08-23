@@ -1,9 +1,13 @@
 # Terremotos España — Dashboard IGN
 
-Dashboard estático de sismicidad en España, generado a partir de las tablas publicadas por el
-[Instituto Geográfico Nacional (IGN)](https://www.ign.es/web/ultimos-terremotos).
+**[Ir al Dashboard](https://rodrigo-j-goncalves.github.io/terremotos-dashboard/)** 
 
-**Demo:** https://rodrigo-j-goncalves.github.io/terremotos-dashboard/
+---
+
+- Dashboard estático de sismicidad en España
+- Generado a partir de las tablas publicadas por el
+[Instituto Geográfico Nacional (IGN)](https://www.ign.es/web/ultimos-terremotos).
+- **[Verlo en vivo](https://rodrigo-j-goncalves.github.io/terremotos-dashboard/)** 
 
 ---
 
@@ -166,3 +170,7 @@ URL: https://www.ign.es/web/ultimos-terremotos
 
 Los datos son públicos. Se recomienda no sobrecargar el servidor del IGN
 (el cron diario es más que suficiente para uso personal o académico).
+
+## Autor
+
+[Rodrigo J. Gonçalves](https://rodrigo-j-goncalves.github.io/)

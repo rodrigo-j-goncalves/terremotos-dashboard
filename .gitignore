@@ -1,3 +1,11 @@
-index.html
-__pycache__/
-*.pyc
+# Ignorar todo...
+*
+
+# ...excepto estos archivos y directorios
+!.gitignore
+!terremotos.py
+!generate_html.py
+!terremotos_db.csv
+!README.md
+!.github/
+!.github/**
