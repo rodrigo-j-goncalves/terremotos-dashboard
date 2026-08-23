@@ -21,7 +21,7 @@ jobs:
           python-version: "3.12"
 
       - name: Instalar dependencias
-        run: pip install pandas requests lxml
+        run: pip install pandas requests html5lib
 
       - name: Scrapear IGN y actualizar CSV
         run: python terremotos.py

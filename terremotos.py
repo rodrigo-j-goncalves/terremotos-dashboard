@@ -43,7 +43,7 @@ def fetch_table(url: str) -> pd.DataFrame:
     """Descarga una URL del IGN y devuelve la tabla de eventos como DataFrame."""
     resp = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
     resp.raise_for_status()
-    tables = pd.read_html(StringIO(resp.text))
+    tables = pd.read_html(StringIO(resp.text), flavor="html5lib")
     for t in tables:
         if "Evento" in t.columns:
             return t
