@@ -1,0 +1,46 @@
+name: Actualizar dashboard
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # 06:00 UTC cada día
+  workflow_dispatch:        # permite ejecución manual
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install pandas requests
+
+      - name: Scrapear IGN y actualizar CSV
+        run: python terremotos.py
+
+      - name: Commitear CSV actualizado
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add terremotos_db.csv
+          git diff --staged --quiet || git commit -m "datos: actualizar terremotos_db.csv [$(date -u +%Y-%m-%d)]"
+          git push
+
+      - name: Generar HTML
+        run: python generate_html.py
+
+      - name: Subir artefacto para Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+
+      - name: Desplegar en GitHub Pages
+        uses: actions/deploy-pages@v4
