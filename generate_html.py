@@ -209,7 +209,7 @@ HTML_TEMPLATE = """\
 
 <div class="plots">
   <div class="card">
-    <div class="card-title">Magnitud vs. tiempo (hora local España)</div>
+    <div class="card-title">Magnitud vs. tiempo (hora local España peninsular)</div>
     <div id="chart-scatter" style="height:340px"></div>
   </div>
   <div class="card">
@@ -224,7 +224,7 @@ HTML_TEMPLATE = """\
       <thead>
         <tr>
           <th data-col="timestamp_local" data-sort="desc">Fecha</th>
-          <th data-col="hora_local">Hora local</th>
+          <th data-col="hora_local">Hora local (España peninsular)</th>
           <th data-col="magnitud">Mag</th>
           <th data-col="profundidad_km">Prof. (km)</th>
           <th data-col="localizacion">Localización</th>
@@ -282,7 +282,7 @@ HTML_TEMPLATE = """\
   const SCATTER_CFG    = { responsive: true, displayModeBar: false };
   const SCATTER_LAYOUT = {
     margin : { t: 10, r: 24, l: 46, b: 50 },
-    xaxis  : { title: { text: 'Hora local (España)', font: { size: 11 } }, type: 'date' },
+    xaxis  : { title: { text: 'Hora local (España peninsular)', font: { size: 11 } }, type: 'date' },
     yaxis  : { title: { text: 'Magnitud',            font: { size: 11 } } },
     hovermode     : 'closest',
     paper_bgcolor : '#ffffff',
