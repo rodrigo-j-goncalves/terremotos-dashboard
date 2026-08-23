@@ -323,7 +323,7 @@ HTML_TEMPLATE = """\
     paper_bgcolor : '#ffffff',
     font          : { family: 'system-ui, sans-serif', size: 11 },
     mapbox: {
-      style  : 'open-street-map',
+      style  : 'carto-positron',
       center : { lat: 36.5, lon: -8.0 },
       zoom   : 4,
     },
