@@ -167,7 +167,7 @@ HTML_TEMPLATE = """\
 
 <header>
   <h1>Terremotos España</h1>
-  <p>Fuente: IGN (Instituto Geográfico Nacional) &nbsp;·&nbsp; Actualizado: __UPDATED__ &nbsp;·&nbsp; __N__ eventos</p>
+  <p>Fuente: <a href="https://www.ign.es/web/ultimos-terremotos" target="_blank" rel="noopener" style="color:#94a3b8">IGN (Instituto Geográfico Nacional)</a> &nbsp;·&nbsp; Actualizado: __UPDATED__ &nbsp;·&nbsp; __N__ eventos</p>
 </header>
 
 <div class="filters">

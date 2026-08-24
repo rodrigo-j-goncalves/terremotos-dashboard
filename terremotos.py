@@ -32,8 +32,11 @@ COLUMN_MAP = {
     "Profundidad (km)": "profundidad_km",
     "Magnitud": "magnitud",
     "Tipo Mag.": "tipo_mag",
+    "Tipo Mag. INFO: Tipo de magnitud (se abrirá nueva ventana)": "tipo_mag",
     "Int. max.": "int_max",
+    "Int. max. INFO: Escala de intensidad (se abrirá nueva ventana)": "int_max",
     "Localización": "localizacion",
+    "Localización INFO: Localización (se abrirá nueva ventana)": "localizacion",
 }
 
 NUMERIC_COLS = ["latitud", "longitud", "profundidad_km", "magnitud"]
