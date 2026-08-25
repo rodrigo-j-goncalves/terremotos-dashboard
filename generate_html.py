@@ -202,6 +202,7 @@ HTML_TEMPLATE = """\
     <label>Hasta</label>
     <input type="date" id="date-to">
   </div>
+  <button class="btn-reset" onclick="filterHoy()" title="Mostrar solo eventos de hoy">Hoy</button>
   <span class="count-badge" id="count"></span>
   <button class="btn-csv"   onclick="downloadCSV()" title="Descargar todos los eventos como CSV">&#8659; CSV</button>
   <button class="btn-reset" onclick="resetFilters()">&#8635; Reset</button>
@@ -488,6 +489,14 @@ HTML_TEMPLATE = """\
     a.href = url; a.download = 'terremotos_ign.csv';
     document.body.appendChild(a); a.click();
     document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+
+  function filterHoy() {
+    const hoy = new Date().toISOString().slice(0, 10);
+    state.dateFrom = hoy; state.dateTo = hoy;
+    document.getElementById('date-from').value = hoy;
+    document.getElementById('date-to').value   = hoy;
+    applyFilters();
   }
 
   function resetFilters() {
