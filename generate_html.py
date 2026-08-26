@@ -7,8 +7,9 @@ Uso:
 """
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -46,7 +47,7 @@ def load_data() -> tuple[list[dict], dict]:
         "date_min": min(dates) if dates else "",
         "date_max": max(dates) if dates else "",
         "locs": locs,
-        "updated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "updated": datetime.now(ZoneInfo("Europe/Madrid")).strftime("%Y-%m-%d %H:%M (hora España)"),
         "n": len(records),
     }
     return records, meta
@@ -71,10 +72,13 @@ HTML_TEMPLATE = """\
     /* Header */
     header {
       background: #0f172a; color: #fff;
-      padding: 0.75rem 1.5rem; display: flex; align-items: baseline; gap: 1rem;
+      padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1rem;
     }
     header h1 { font-size: 1.05rem; font-weight: 700; }
     header p  { font-size: 0.78rem; color: #94a3b8; }
+    header .author { margin-left: auto; font-size: 0.78rem; color: #94a3b8; white-space: nowrap; }
+    header .author a { color: #94a3b8; text-decoration: none; }
+    header .author a:hover { color: #fff; }
 
     /* Filtros */
     .filters {
@@ -168,6 +172,7 @@ HTML_TEMPLATE = """\
 <header>
   <h1>Terremotos España</h1>
   <p>Fuente: <a href="https://www.ign.es/web/ultimos-terremotos" target="_blank" rel="noopener" style="color:#94a3b8">IGN (Instituto Geográfico Nacional)</a> &nbsp;·&nbsp; Actualizado: __UPDATED__ &nbsp;·&nbsp; __N__ eventos</p>
+  <span class="author">Dashboard: <a href="https://rodrigo-j-goncalves.github.io" target="_blank" rel="noopener">Rodrigo J. Gonçalves</a></span>
 </header>
 
 <div class="filters">
@@ -323,8 +328,8 @@ HTML_TEMPLATE = """\
     margin        : { t: 0, r: 0, l: 0, b: 0 },
     paper_bgcolor : '#ffffff',
     font          : { family: 'system-ui, sans-serif', size: 11 },
-    mapbox: {
-      style  : 'carto-positron',
+    map: {
+      style  : 'open-street-map',
       center : { lat: 36.5, lon: -8.0 },
       zoom   : 4,
     },
@@ -332,7 +337,7 @@ HTML_TEMPLATE = """\
 
   function updateMap(data) {
     Plotly.react('chart-map', [{
-      type      : 'scattermapbox',
+      type      : 'scattermap',
       lat       : data.map(d => d.latitud),
       lon       : data.map(d => d.longitud),
       mode      : 'markers',
