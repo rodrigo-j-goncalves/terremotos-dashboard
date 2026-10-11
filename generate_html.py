@@ -163,6 +163,7 @@ HTML_TEMPLATE = """\
     .table-card {
       background: #fff; border-radius: 8px;
       box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: auto;
+      max-height: 380px;
     }
     table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
     thead th {
@@ -171,6 +172,7 @@ HTML_TEMPLATE = """\
       white-space: nowrap; user-select: none; cursor: pointer;
       color: #475569; font-size: 0.72rem;
       text-transform: uppercase; letter-spacing: 0.05em;
+      position: sticky; top: 0; z-index: 1;
     }
     thead th:hover { background: #f1f5f9; color: #1a1a1a; }
     thead th[data-sort=asc]::after  { content: " ↑"; color: #3b82f6; }
@@ -178,6 +180,8 @@ HTML_TEMPLATE = """\
     td { padding: 0.42rem 0.75rem; border-bottom: 1px solid #f1f5f9; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #f8fafc; }
+    tbody tr { cursor: pointer; }
+    tr.row-selected td { background: #dbeafe !important; }
     .mag-hi  { color: #dc2626; font-weight: 700; }
     .mag-md  { color: #d97706; font-weight: 600; }
     .loc-nd  { color: #94a3b8; font-style: italic; }
@@ -281,15 +285,17 @@ HTML_TEMPLATE = """\
 
   // ── Estado global de filtros ─────────────────────────────────────────────────
   const state = {
-    locExact : '',
-    locText  : '',
-    magMin   : MAG_GLOBAL_MIN,
-    magMax   : MAG_GLOBAL_MAX,
-    dateFrom : DATE_GLOBAL_MIN,
-    dateTo   : DATE_GLOBAL_MAX,
-    sortCol  : 'timestamp_local',
-    sortAsc  : false,
+    locExact      : '',
+    locText       : '',
+    magMin        : MAG_GLOBAL_MIN,
+    magMax        : MAG_GLOBAL_MAX,
+    dateFrom      : DATE_GLOBAL_MIN,
+    dateTo        : DATE_GLOBAL_MAX,
+    sortCol       : 'timestamp_local',
+    sortAsc       : false,
+    selectedEvento: null,
   };
+  let _filteredData = [];
 
   // ── Filtrado ─────────────────────────────────────────────────────────────────
   function applyFilters() {
@@ -303,6 +309,10 @@ HTML_TEMPLATE = """\
       if (state.dateTo   && date > state.dateTo)   return false;
       return true;
     });
+    if (state.selectedEvento && !filtered.find(d => d.evento === state.selectedEvento)) {
+      state.selectedEvento = null;
+    }
+    _filteredData = filtered;
     document.getElementById('count').textContent =
       filtered.length + ' evento' + (filtered.length !== 1 ? 's' : '');
     updateScatter(filtered);
@@ -323,28 +333,39 @@ HTML_TEMPLATE = """\
   };
 
   function updateScatter(data) {
-    Plotly.react('chart-scatter', [{
-      x    : data.map(d => d.timestamp_local),
-      y    : data.map(d => d.magnitud),
-      mode : 'markers',
-      type : 'scatter',
-      text       : data.map(d => d.localizacion),
-      customdata : data.map(d => [d.evento, d.profundidad_km, d.fecha]),
-      hovertemplate:
-        '<b>%{text}</b><br>' +
-        'Mag: <b>%{y:.1f}</b> · Prof: %{customdata[1]} km<br>' +
-        '%{customdata[2]} — %{x|%H:%M} h local<br>' +
-        '<span style="color:#94a3b8">%{customdata[0]}</span><extra></extra>',
-      marker: {
-        color      : data.map(d => d.profundidad_km),
-        colorscale : 'Viridis',
-        reversescale: true,
-        size       : 8,
-        opacity    : 0.78,
-        line       : { width: 0.5, color: '#555' },
-        colorbar   : { title: { text: 'Prof. (km)', side: 'right' }, thickness: 12, len: 0.8 },
+    const selIdx = state.selectedEvento ? data.findIndex(d => d.evento === state.selectedEvento) : -1;
+    const selD   = selIdx >= 0 ? [data[selIdx]] : [];
+    Plotly.react('chart-scatter', [
+      {
+        x    : data.map(d => d.timestamp_local),
+        y    : data.map(d => d.magnitud),
+        mode : 'markers',
+        type : 'scatter',
+        text       : data.map(d => d.localizacion),
+        customdata : data.map(d => [d.evento, d.profundidad_km, d.fecha]),
+        hovertemplate:
+          '<b>%{text}</b><br>' +
+          'Mag: <b>%{y:.1f}</b> · Prof: %{customdata[1]} km<br>' +
+          '%{customdata[2]} — %{x|%H:%M} h local<br>' +
+          '<span style="color:#94a3b8">%{customdata[0]}</span><extra></extra>',
+        marker: {
+          color      : data.map(d => d.profundidad_km),
+          colorscale : 'Viridis',
+          reversescale: true,
+          size       : 8,
+          opacity    : 0.78,
+          line       : { width: 0.5, color: '#555' },
+          colorbar   : { title: { text: 'Prof. (km)', side: 'right' }, thickness: 12, len: 0.8 },
+        },
       },
-    }], SCATTER_LAYOUT, SCATTER_CFG);
+      {
+        x: selD.map(d => d.timestamp_local),
+        y: selD.map(d => d.magnitud),
+        mode: 'markers', type: 'scatter',
+        hoverinfo: 'skip', showlegend: false,
+        marker: { color: '#2563eb', size: 14, opacity: 1, line: { width: 2, color: '#fff' } },
+      },
+    ], SCATTER_LAYOUT, SCATTER_CFG);
   }
 
   // ── Mapa ─────────────────────────────────────────────────────────────────────
@@ -374,32 +395,44 @@ HTML_TEMPLATE = """\
   }
 
   function updateMap(data) {
+    const selIdx = state.selectedEvento ? data.findIndex(d => d.evento === state.selectedEvento) : -1;
+    const selD   = selIdx >= 0 ? [data[selIdx]] : [];
     const { center, zoom } = mapView(data);
     const layout = Object.assign({}, MAP_LAYOUT, {
       map: { style: 'open-street-map', center, zoom }
     });
-    Plotly.react('chart-map', [{
-      type      : 'scattermap',
-      lat       : data.map(d => d.latitud),
-      lon       : data.map(d => d.longitud),
-      mode      : 'markers',
-      hoverinfo : 'text',
-      text      : data.map(d =>
-        `${d.localizacion}<br>` +
-        `Mag <b>${d.magnitud != null ? d.magnitud.toFixed(1) : '?'}</b>` +
-        ` · Prof: ${d.profundidad_km != null ? d.profundidad_km.toFixed(0) : '?'} km<br>` +
-        `${d.fecha}  ${d.hora_local || ''}`
-      ),
-      marker: {
-        size       : data.map(d => Math.max(6, (d.magnitud || 0) * 5)),
-        color      : data.map(d => d.magnitud),
-        colorscale : 'Reds',
-        cmin       : MAG_GLOBAL_MIN,
-        cmax       : MAG_GLOBAL_MAX,
-        opacity    : 0.80,
-        colorbar   : { title: { text: 'Mag', side: 'right' }, thickness: 12, len: 0.65 },
+    Plotly.react('chart-map', [
+      {
+        type      : 'scattermap',
+        lat       : data.map(d => d.latitud),
+        lon       : data.map(d => d.longitud),
+        mode      : 'markers',
+        hoverinfo : 'text',
+        text      : data.map(d =>
+          `${d.localizacion}<br>` +
+          `Mag <b>${d.magnitud != null ? d.magnitud.toFixed(1) : '?'}</b>` +
+          ` · Prof: ${d.profundidad_km != null ? d.profundidad_km.toFixed(0) : '?'} km<br>` +
+          `${d.fecha}  ${d.hora_local || ''}`
+        ),
+        marker: {
+          size       : data.map(d => Math.max(6, (d.magnitud || 0) * 5)),
+          color      : data.map(d => d.magnitud),
+          colorscale : 'Reds',
+          cmin       : MAG_GLOBAL_MIN,
+          cmax       : MAG_GLOBAL_MAX,
+          opacity    : 0.80,
+          colorbar   : { title: { text: 'Mag', side: 'right' }, thickness: 12, len: 0.65 },
+        },
       },
-    }], layout, MAP_CFG);
+      {
+        type: 'scattermap',
+        lat: selD.map(d => d.latitud),
+        lon: selD.map(d => d.longitud),
+        mode: 'markers',
+        hoverinfo: 'skip', showlegend: false,
+        marker: { size: 20, color: '#2563eb', opacity: 1, line: { width: 3, color: '#fff' } },
+      },
+    ], layout, MAP_CFG);
   }
 
   // ── Tabla ─────────────────────────────────────────────────────────────────────
@@ -427,7 +460,8 @@ HTML_TEMPLATE = """\
     const rows = sortData(data).map(d => {
       const mc  = magClass(d.magnitud);
       const loc = d.localizacion === 'Localización no disponible';
-      return `<tr>
+      const sel = d.evento === state.selectedEvento ? 'row-selected' : '';
+      return `<tr data-evento="${d.evento}" class="${sel}" onclick="selectEvento('${d.evento}')">
         <td>${d.fecha || ''}</td>
         <td>${d.hora_local || ''}</td>
         <td class="${mc}">${d.magnitud != null ? d.magnitud.toFixed(1) : ''}</td>
@@ -439,6 +473,19 @@ HTML_TEMPLATE = """\
       </tr>`;
     });
     document.querySelector('#tabla-eventos tbody').innerHTML = rows.join('');
+  }
+
+  function selectEvento(eventoId) {
+    state.selectedEvento = (state.selectedEvento === eventoId) ? null : eventoId;
+    document.querySelectorAll('#tabla-eventos tbody tr').forEach(tr => {
+      tr.classList.toggle('row-selected', tr.dataset.evento === state.selectedEvento);
+    });
+    if (state.selectedEvento) {
+      const row = document.querySelector(`#tabla-eventos tr[data-evento="${state.selectedEvento}"]`);
+      if (row) row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+    updateScatter(_filteredData);
+    updateMap(_filteredData);
   }
 
   function initTableSort() {
@@ -584,6 +631,23 @@ HTML_TEMPLATE = """\
     initControls();
     initTableSort();
     applyFilters();
+
+    const scatterEl = document.getElementById('chart-scatter');
+    const mapEl     = document.getElementById('chart-map');
+
+    scatterEl.on('plotly_click', ev => {
+      const pt = ev.points[0];
+      if (pt.curveNumber !== 0) { selectEvento(state.selectedEvento); return; }
+      const d = _filteredData[pt.pointIndex];
+      if (d) selectEvento(d.evento);
+    });
+
+    mapEl.on('plotly_click', ev => {
+      const pt = ev.points[0];
+      if (pt.curveNumber !== 0) { selectEvento(state.selectedEvento); return; }
+      const d = _filteredData[pt.pointIndex];
+      if (d) selectEvento(d.evento);
+    });
   });
 </script>
 </body>
