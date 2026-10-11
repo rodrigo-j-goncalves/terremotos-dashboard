@@ -336,14 +336,13 @@ HTML_TEMPLATE = """\
         '%{customdata[2]} — %{x|%H:%M} h local<br>' +
         '<span style="color:#94a3b8">%{customdata[0]}</span><extra></extra>',
       marker: {
-        color      : data.map(d => d.magnitud),
-        colorscale : 'Reds',
-        cmin       : MAG_GLOBAL_MIN,
-        cmax       : MAG_GLOBAL_MAX,
+        color      : data.map(d => d.profundidad_km),
+        colorscale : 'Viridis',
+        reversescale: true,
         size       : 8,
         opacity    : 0.78,
         line       : { width: 0.5, color: '#555' },
-        colorbar   : { title: { text: 'Mag', side: 'right' }, thickness: 12, len: 0.8 },
+        colorbar   : { title: { text: 'Prof. (km)', side: 'right' }, thickness: 12, len: 0.8 },
       },
     }], SCATTER_LAYOUT, SCATTER_CFG);
   }
