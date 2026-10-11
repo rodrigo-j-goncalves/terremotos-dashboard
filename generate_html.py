@@ -194,7 +194,7 @@ HTML_TEMPLATE = """\
 
 <header>
   <h1>Terremotos España</h1>
-  <p>Fuente: <a href="https://www.ign.es/web/ultimos-terremotos" target="_blank" rel="noopener" style="color:#94a3b8">IGN (Instituto Geográfico Nacional)</a> &nbsp;·&nbsp; Actualizado: __UPDATED__ &nbsp;·&nbsp; __N__ eventos</p>
+  <p>Fuente: <a href="https://www.ign.es/web/ultimos-terremotos" target="_blank" rel="noopener" style="color:#94a3b8">IGN (Instituto Geográfico Nacional)</a> &nbsp;·&nbsp; Actualizado: __UPDATED__ &nbsp;·&nbsp; __N__ eventos (desde agosto 2026)</p>
   <span class="author">Dashboard: <a href="https://rodrigo-j-goncalves.github.io" target="_blank" rel="noopener">Rodrigo J. Gonçalves</a></span>
 </header>
 
@@ -529,11 +529,20 @@ HTML_TEMPLATE = """\
   }
 
   function filterHoy() {
-    const hoy = new Date().toISOString().slice(0, 10);
-    state.dateFrom = hoy; state.dateTo = hoy;
-    document.getElementById('date-from').value = hoy;
-    document.getElementById('date-to').value   = hoy;
-    document.getElementById('date-group').classList.add('hoy-active');
+    const grp = document.getElementById('date-group');
+    if (grp.classList.contains('hoy-active')) {
+      deactivateHoy();
+      state.dateFrom = DATE_GLOBAL_MIN;
+      state.dateTo   = DATE_GLOBAL_MAX;
+      document.getElementById('date-from').value = DATE_GLOBAL_MIN;
+      document.getElementById('date-to').value   = DATE_GLOBAL_MAX;
+    } else {
+      const hoy = new Date().toISOString().slice(0, 10);
+      state.dateFrom = hoy; state.dateTo = hoy;
+      document.getElementById('date-from').value = hoy;
+      document.getElementById('date-to').value   = hoy;
+      grp.classList.add('hoy-active');
+    }
     applyFilters();
   }
 
