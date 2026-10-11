@@ -361,6 +361,10 @@ HTML_TEMPLATE = """\
   };
 
   function updateMap(data) {
+    const mapSection = data.length > 0
+      ? { style: 'open-street-map', fitbounds: 'locations', fitboundspadding: 30 }
+      : { style: 'open-street-map', center: { lat: 36.5, lon: -8.0 }, zoom: 4 };
+    const layout = Object.assign({}, MAP_LAYOUT, { map: mapSection });
     Plotly.react('chart-map', [{
       type      : 'scattermap',
       lat       : data.map(d => d.latitud),
@@ -382,7 +386,7 @@ HTML_TEMPLATE = """\
         opacity    : 0.80,
         colorbar   : { title: { text: 'Mag', side: 'right' }, thickness: 12, len: 0.65 },
       },
-    }], MAP_LAYOUT, MAP_CFG);
+    }], layout, MAP_CFG);
   }
 
   // ── Tabla ─────────────────────────────────────────────────────────────────────
