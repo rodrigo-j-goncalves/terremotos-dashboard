@@ -90,6 +90,10 @@ HTML_TEMPLATE = """\
       font-size: 0.68rem; font-weight: 700; color: #64748b;
       text-transform: uppercase; letter-spacing: 0.07em;
     }
+    .fg label small {
+      font-weight: 400; text-transform: none; letter-spacing: 0;
+      color: #94a3b8;
+    }
     .fg select,
     .fg input[type=text],
     .fg input[type=date] {
@@ -119,6 +123,25 @@ HTML_TEMPLATE = """\
     }
     .btn-reset:hover,
     .btn-csv:hover { background: #f1f5f9; }
+
+    .date-group {
+      display: flex; align-items: flex-end; gap: 0.5rem;
+      border: 1px solid #e2e8f0; border-radius: 6px;
+      padding: 0.35rem 0.6rem;
+    }
+    .date-or {
+      font-size: 0.75rem; color: #94a3b8;
+      padding-bottom: 0.35rem; align-self: flex-end;
+    }
+    .btn-hoy {
+      padding: 0.3rem 0.7rem; border: 1px solid #f59e0b; border-radius: 5px;
+      background: #fef9ee; cursor: pointer; font-size: 0.8rem; color: #92400e;
+      white-space: nowrap; align-self: flex-end;
+    }
+    .btn-hoy:hover { background: #fde68a; }
+    .date-group.hoy-active .fg { opacity: 0.4; pointer-events: none; }
+    .date-group.hoy-active .date-or { opacity: 0.4; }
+    .date-group.hoy-active .btn-hoy { background: #f59e0b; color: #fff; border-color: #d97706; }
 
     /* Grid de gráficos */
     .plots {
@@ -199,15 +222,18 @@ HTML_TEMPLATE = """\
       <span class="mag-val" id="mag-max-val"></span>
     </div>
   </div>
-  <div class="fg">
-    <label>Desde</label>
-    <input type="date" id="date-from">
+  <div class="date-group" id="date-group">
+    <div class="fg">
+      <label>Desde <small>(dd/mm/aaaa)</small></label>
+      <input type="date" id="date-from">
+    </div>
+    <div class="fg">
+      <label>Hasta <small>(dd/mm/aaaa)</small></label>
+      <input type="date" id="date-to">
+    </div>
+    <div class="date-or">ó</div>
+    <button class="btn-hoy" id="btn-hoy" onclick="filterHoy()" title="Muestra solo los eventos de hoy (reemplaza el rango de fechas)">Solo hoy</button>
   </div>
-  <div class="fg">
-    <label>Hasta</label>
-    <input type="date" id="date-to">
-  </div>
-  <button class="btn-reset" onclick="filterHoy()" title="Mostrar solo eventos de hoy">Hoy</button>
   <span class="count-badge" id="count"></span>
   <button class="btn-csv"   onclick="downloadCSV()" title="Descargar todos los eventos como CSV">&#8659; CSV</button>
   <button class="btn-reset" onclick="resetFilters()">&#8635; Reset</button>
@@ -470,10 +496,12 @@ HTML_TEMPLATE = """\
     document.getElementById('date-to').value   = DATE_GLOBAL_MAX;
     document.getElementById('date-from').addEventListener('change', e => {
       state.dateFrom = e.target.value;
+      deactivateHoy();
       applyFilters();
     });
     document.getElementById('date-to').addEventListener('change', e => {
       state.dateTo = e.target.value;
+      deactivateHoy();
       applyFilters();
     });
   }
@@ -496,11 +524,16 @@ HTML_TEMPLATE = """\
     document.body.removeChild(a); URL.revokeObjectURL(url);
   }
 
+  function deactivateHoy() {
+    document.getElementById('date-group').classList.remove('hoy-active');
+  }
+
   function filterHoy() {
     const hoy = new Date().toISOString().slice(0, 10);
     state.dateFrom = hoy; state.dateTo = hoy;
     document.getElementById('date-from').value = hoy;
     document.getElementById('date-to').value   = hoy;
+    document.getElementById('date-group').classList.add('hoy-active');
     applyFilters();
   }
 
@@ -517,6 +550,7 @@ HTML_TEMPLATE = """\
     state.dateTo   = DATE_GLOBAL_MAX;
     document.getElementById('date-from').value = DATE_GLOBAL_MIN;
     document.getElementById('date-to').value   = DATE_GLOBAL_MAX;
+    deactivateHoy();
     applyFilters();
   }
 
