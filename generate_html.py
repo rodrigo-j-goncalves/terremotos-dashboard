@@ -360,11 +360,24 @@ HTML_TEMPLATE = """\
     },
   };
 
+  function mapView(data) {
+    const lats = data.map(d => d.latitud).filter(v => v != null);
+    const lons = data.map(d => d.longitud).filter(v => v != null);
+    if (lats.length === 0) return { center: { lat: 36.5, lon: -8.0 }, zoom: 4 };
+    const latMin = Math.min(...lats), latMax = Math.max(...lats);
+    const lonMin = Math.min(...lons), lonMax = Math.max(...lons);
+    const center = { lat: (latMin + latMax) / 2, lon: (lonMin + lonMax) / 2 };
+    const span = Math.max(latMax - latMin, lonMax - lonMin);
+    const paddedSpan = Math.max(span * 1.4, 0.5);
+    const zoom = Math.max(2, Math.min(12, Math.floor(Math.log2(360 / paddedSpan))));
+    return { center, zoom };
+  }
+
   function updateMap(data) {
-    const mapSection = data.length > 0
-      ? { style: 'open-street-map', fitbounds: 'locations', fitboundspadding: 30 }
-      : { style: 'open-street-map', center: { lat: 36.5, lon: -8.0 }, zoom: 4 };
-    const layout = Object.assign({}, MAP_LAYOUT, { map: mapSection });
+    const { center, zoom } = mapView(data);
+    const layout = Object.assign({}, MAP_LAYOUT, {
+      map: { style: 'open-street-map', center, zoom }
+    });
     Plotly.react('chart-map', [{
       type      : 'scattermap',
       lat       : data.map(d => d.latitud),
