@@ -19,10 +19,11 @@
 
 2. **`generate_html.py`** — Lee `terremotos_db.csv` y genera `index.html`:
    página 100 % estática con Plotly.js (CDN) y JS vanilla.
-   - Scatter magnitud vs. tiempo (hora local España)
-   - Mapa de epicentros (scattergeo, cubre Península + Canarias)
-   - Tabla ordenable por cualquier columna
-   - Filtros sincronizados: localización, magnitud (rango), fecha (rango)
+   - Scatter magnitud vs. tiempo (hora local España); color = profundidad focal
+   - Mapa de epicentros (scattermap MapLibre + OpenStreetMap); color y tamaño = magnitud; zoom automático a los datos filtrados
+   - Tabla ordenable por cualquier columna, con encabezados fijos
+   - Filtros sincronizados: localización, magnitud (rango), fecha (rango), botón "Solo hoy"
+   - Click en cualquier punto (scatter, mapa) o fila (tabla) resalta el evento en los tres paneles
 
 No hay backend ni servidor: el HTML resultante puede servirse directamente desde GitHub Pages.
 
