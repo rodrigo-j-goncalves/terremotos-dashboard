@@ -283,14 +283,24 @@ HTML_TEMPLATE = """\
   const DATE_GLOBAL_MIN = '__DATE_MIN__';
   const DATE_GLOBAL_MAX = '__DATE_MAX__';
 
+  // ── Helpers de fecha ─────────────────────────────────────────────────────────
+  function todayISO() {
+    return new Date().toISOString().slice(0, 10);
+  }
+  function defaultDateFrom() {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    return d.toISOString().slice(0, 10);
+  }
+
   // ── Estado global de filtros ─────────────────────────────────────────────────
   const state = {
     locExact      : '',
     locText       : '',
     magMin        : MAG_GLOBAL_MIN,
     magMax        : MAG_GLOBAL_MAX,
-    dateFrom      : DATE_GLOBAL_MIN,
-    dateTo        : DATE_GLOBAL_MAX,
+    dateFrom      : defaultDateFrom(),
+    dateTo        : todayISO(),
     sortCol       : 'timestamp_local',
     sortAsc       : false,
     selectedEvento: null,
@@ -335,6 +345,13 @@ HTML_TEMPLATE = """\
   function updateScatter(data) {
     const selIdx = state.selectedEvento ? data.findIndex(d => d.evento === state.selectedEvento) : -1;
     const selD   = selIdx >= 0 ? [data[selIdx]] : [];
+    const timestamps = data.map(d => d.timestamp_local).filter(Boolean);
+    const xaxisRange = timestamps.length > 0
+      ? { range: [undefined, new Date(new Date(timestamps.reduce((a,b) => a>b?a:b)).getTime() + 5*3600000).toISOString()] }
+      : {};
+    const scatterLayout = Object.assign({}, SCATTER_LAYOUT, {
+      xaxis: Object.assign({}, SCATTER_LAYOUT.xaxis, xaxisRange),
+    });
     Plotly.react('chart-scatter', [
       {
         x    : data.map(d => d.timestamp_local),
@@ -365,7 +382,7 @@ HTML_TEMPLATE = """\
         hoverinfo: 'skip', showlegend: false,
         marker: { color: '#2563eb', size: 14, opacity: 1, line: { width: 2, color: '#fff' } },
       },
-    ], SCATTER_LAYOUT, SCATTER_CFG);
+    ], scatterLayout, SCATTER_CFG);
   }
 
   // ── Mapa ─────────────────────────────────────────────────────────────────────
@@ -555,8 +572,8 @@ HTML_TEMPLATE = """\
     });
 
     // Rango de fechas
-    document.getElementById('date-from').value = DATE_GLOBAL_MIN;
-    document.getElementById('date-to').value   = DATE_GLOBAL_MAX;
+    document.getElementById('date-from').value = state.dateFrom;
+    document.getElementById('date-to').value   = state.dateTo;
     document.getElementById('date-from').addEventListener('change', e => {
       state.dateFrom = e.target.value;
       deactivateHoy();
@@ -595,12 +612,12 @@ HTML_TEMPLATE = """\
     const grp = document.getElementById('date-group');
     if (grp.classList.contains('hoy-active')) {
       deactivateHoy();
-      state.dateFrom = DATE_GLOBAL_MIN;
-      state.dateTo   = DATE_GLOBAL_MAX;
-      document.getElementById('date-from').value = DATE_GLOBAL_MIN;
-      document.getElementById('date-to').value   = DATE_GLOBAL_MAX;
+      state.dateFrom = defaultDateFrom();
+      state.dateTo   = todayISO();
+      document.getElementById('date-from').value = state.dateFrom;
+      document.getElementById('date-to').value   = state.dateTo;
     } else {
-      const hoy = new Date().toISOString().slice(0, 10);
+      const hoy = todayISO();
       state.dateFrom = hoy; state.dateTo = hoy;
       document.getElementById('date-from').value = hoy;
       document.getElementById('date-to').value   = hoy;
@@ -618,10 +635,10 @@ HTML_TEMPLATE = """\
     document.getElementById('mag-max').value     = MAG_GLOBAL_MAX;
     document.getElementById('mag-min-val').textContent = MAG_GLOBAL_MIN.toFixed(1);
     document.getElementById('mag-max-val').textContent = MAG_GLOBAL_MAX.toFixed(1);
-    state.dateFrom = DATE_GLOBAL_MIN;
-    state.dateTo   = DATE_GLOBAL_MAX;
-    document.getElementById('date-from').value = DATE_GLOBAL_MIN;
-    document.getElementById('date-to').value   = DATE_GLOBAL_MAX;
+    state.dateFrom = defaultDateFrom();
+    state.dateTo   = todayISO();
+    document.getElementById('date-from').value = state.dateFrom;
+    document.getElementById('date-to').value   = state.dateTo;
     deactivateHoy();
     applyFilters();
   }
