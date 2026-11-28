@@ -38,7 +38,7 @@ jobs:
         run: python generate_html.py
 
       - name: Subir artefacto para Pages
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: "."
 
